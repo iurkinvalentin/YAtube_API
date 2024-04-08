@@ -48,7 +48,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet для групп. Поддерживает только операции чтения."""
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -57,7 +57,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Поддерживает создание, чтение, обновление и удаление комментариев."""
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly,]
+                          IsOwnerOrReadOnly]
 
     def get_queryset(self):
         """Возвращает набор данных, отфильтрованный по идентификатору поста."""
