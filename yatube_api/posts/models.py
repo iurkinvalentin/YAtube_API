@@ -6,10 +6,13 @@ User = get_user_model()
 
 class Follow(models.Model):
     """Модель подписок пользователей."""
+
     user = models.ForeignKey(User, related_name='followers',
-                             on_delete=models.CASCADE)
+                             on_delete=models.CASCADE,
+                             verbose_name='Пользователь')
     following = models.ForeignKey(User, related_name='followings',
-                                  on_delete=models.CASCADE)
+                                  on_delete=models.CASCADE,
+                                  verbose_name='Подписки')
 
     class Meta:
         constraints = [
@@ -25,31 +28,37 @@ class Follow(models.Model):
 
 class Group(models.Model):
     """Модель для группировки постов."""
+
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     description = models.TextField()
 
     def __str__(self):
-        return self.title
+        return self.title[:30]
 
 
 class Post(models.Model):
     """Модель для публикации постов."""
-    group = models.ForeignKey('Group', on_delete=models.CASCADE,
+
+    group = models.ForeignKey('Group', on_delete=models.SET_NULL,
                               null=True, blank=True)
     text = models.TextField()
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='posts')
+        User, on_delete=models.CASCADE)
     image = models.ImageField(
         upload_to='posts/', null=True, blank=True)
 
     def __str__(self):
-        return self.text
+        return self.text[:30]
+
+    class Meta:
+        default_related_name = 'posts'
 
 
 class Comment(models.Model):
     """Модель для комментариев к постам."""
+
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     post = models.ForeignKey(
@@ -57,3 +66,10 @@ class Comment(models.Model):
     text = models.TextField()
     created = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        preview_text = self.text[:30]
+        return (
+            f'Комментарий от {self.author.username} к '
+            f'"{self.post.title}": "{preview_text}"'
+        )

@@ -1,14 +1,16 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
-from posts.models import Comment, Post, Group, Follow
-from django.contrib.auth import get_user_model
+from posts.models import Comment, Follow, Group, Post
+
 User = get_user_model()
 
 
 class FollowSerializer(serializers.ModelSerializer):
     """Сериализатор для подписок пользователей."""
+
     user = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
@@ -19,7 +21,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ['user', 'following']
+        fields = ('user', 'following')
 
         validators = [
             UniqueTogetherValidator(
@@ -28,16 +30,17 @@ class FollowSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate(self, data):
-        if data['following'] == self.context['request'].user:
+    def validate_following(self, value):
+        if value == self.context['request'].user:
             raise serializers.ValidationError(
                 "Нельзя подписаться на самого себя."
             )
-        return data
+        return value
 
 
 class PostSerializer(serializers.ModelSerializer):
     """Сериализатор для постов в блоге."""
+
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -47,6 +50,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор для комментариев к постам."""
+
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
@@ -55,11 +59,11 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['id', 'author', 'text', 'created', 'post']
-        read_only_fields = ('id', 'created')
 
 
 class GroupSerializer(serializers.ModelSerializer):
     """Сериализатор для групп, организующих посты по категориям."""
+
     class Meta:
         model = Group
-        fields = ('id', 'title', 'slug', 'description')
+        fields = '__all__'
