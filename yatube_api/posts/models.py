@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from posts.constants import MAX_LENGTH
+
 User = get_user_model()
 
 
@@ -34,7 +36,7 @@ class Group(models.Model):
     description = models.TextField()
 
     def __str__(self):
-        return self.title[:30]
+        return self.title[:MAX_LENGTH]
 
 
 class Post(models.Model):
@@ -49,11 +51,11 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to='posts/', null=True, blank=True)
 
-    def __str__(self):
-        return self.text[:30]
-
     class Meta:
         default_related_name = 'posts'
+
+    def __str__(self):
+        return self.text[:MAX_LENGTH]
 
 
 class Comment(models.Model):
@@ -68,7 +70,7 @@ class Comment(models.Model):
         'Дата добавления', auto_now_add=True, db_index=True)
 
     def __str__(self):
-        preview_text = self.text[:30]
+        preview_text = self.text[:MAX_LENGTH]
         return (
             f'Комментарий от {self.author.username} к '
             f'"{self.post.title}": "{preview_text}"'
